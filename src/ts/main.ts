@@ -4,7 +4,7 @@ import Config from '../../config.json';
 import { Permissions, Rank } from './protocol/Permissions.js';
 import { User } from './protocol/User.js';
 import TurnStatus from './protocol/TurnStatus.js';
-import Keyboard from 'simple-keyboard';
+import * as kblayout from './keyboardLayout.js';
 import { OSK_buttonToKeysym } from './keyboard';
 import 'simple-keyboard/build/css/index.css';
 import VoteStatus from './protocol/VoteStatus.js';
@@ -142,112 +142,13 @@ const elements = {
 
 let auth : AuthManager|null = null;
 
-/* Start OSK */
-let commonKeyboardOptions = {
-	onKeyPress: (button: string) => onKeyPress(button),
-	theme: 'simple-keyboard hg-theme-default cvmDark cvmDisabled hg-layout-default',
-	syncInstanceInputs: true,
-	mergeDisplay: true
-};
-
-let keyboard = new Keyboard('.osk-main', {
-	...commonKeyboardOptions,
-	layout: {
-		default: [
-			'{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
-			'` 1 2 3 4 5 6 7 8 9 0 - = {backspace}',
-			'{tab} q w e r t y u i o p [ ] \\',
-			"{capslock} a s d f g h j k l ; ' {enter}",
-			'{shiftleft} z x c v b n m , . / {shiftright}',
-			'{controlleft} {metaleft} {altleft} {space} {altright} {metaright} {controlright}'
-		],
-		shift: [
-			'{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
-			'~ ! @ # $ % ^ & * ( ) _ + {backspace}',
-			'{tab} Q W E R T Y U I O P { } |',
-			'{capslock} A S D F G H J K L : " {enter}',
-			'{shiftleft} Z X C V B N M < > ? {shiftright}',
-			'{controlleft} {metaleft} {altleft} {space} {altright} {metaright} {controlright}'
-		],
-		capslock: [
-			'{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
-			'` 1 2 3 4 5 6 7 8 9 0 - = {backspace}',
-			'{tab} Q W E R T Y U I O P [ ] \\',
-			"{capslock} A S D F G H J K L ; ' {enter}",
-			'{shiftleft} Z X C V B N M , . / {shiftright}',
-			'{controlleft} {metaleft} {altleft} {space} {altright} {metaright} {controlright}'
-		],
-		shiftcaps: [
-			'{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
-			'~ ! @ # $ % ^ & * ( ) _ + {backspace}',
-			'{tab} q w e r t y u i o p { } |',
-			'{capslock} a s d f g h j k l : " {enter}',
-			'{shiftleft} z x c v b n m < > ? {shiftright}',
-			'{controlleft} {metaleft} {altleft} {space} {altright} {metaright} {controlright}'
-		]
-	},
-	display: {
-		'{escape}': 'Esc',
-		'{tab}': 'Tab',
-		'{backspace}': 'Back',
-		'{enter}': 'Enter',
-		'{capslock}': 'Caps',
-		'{shiftleft}': 'Shift',
-		'{shiftright}': 'Shift',
-		'{controlleft}': 'Ctrl',
-		'{controlright}': 'Ctrl',
-		'{altleft}': 'Alt',
-		'{altright}': 'Alt',
-		'{metaleft}': 'Super',
-		'{metaright}': 'Menu'
-	}
-});
-
-let keyboardControlPad = new Keyboard('.osk-control', {
-	...commonKeyboardOptions,
-	layout: {
-		default: ['{prtscr} {scrolllock} {pause}', '{insert} {home} {pageup}', '{delete} {end} {pagedown}']
-	},
-	display: {
-		'{prtscr}': 'Print',
-		'{scrolllock}': 'Scroll',
-		'{pause}': 'Pause',
-		'{insert}': 'Ins',
-		'{home}': 'Home',
-		'{pageup}': 'PgUp',
-		'{delete}': 'Del',
-		'{end}': 'End',
-		'{pagedown}': 'PgDn'
-	}
-});
-
-let keyboardArrows = new Keyboard('.osk-arrows', {
-	...commonKeyboardOptions,
-	layout: {
-		default: ['{arrowup}', '{arrowleft} {arrowdown} {arrowright}']
-	}
-});
-
-let keyboardNumPad = new Keyboard('.osk-numpad', {
-	...commonKeyboardOptions,
-	layout: {
-		default: ['{numlock} {numpaddivide} {numpadmultiply}', '{numpad7} {numpad8} {numpad9}', '{numpad4} {numpad5} {numpad6}', '{numpad1} {numpad2} {numpad3}', '{numpad0} {numpaddecimal}']
-	}
-});
-
-let keyboardNumPadEnd = new Keyboard('.osk-numpadEnd', {
-	...commonKeyboardOptions,
-	layout: {
-		default: ['{numpadsubtract}', '{numpadadd}', '{numpadenter}']
-	}
-});
-
 let shiftHeld = false;
 let ctrlHeld = false;
 let capsHeld = false;
 let altHeld = false;
 let metaHeld = false;
 
+/* Start OSK handling */
 const setButtonBackground = (selectors: string, condition: boolean) => {
 	for (let button of document.querySelectorAll(selectors) as NodeListOf<HTMLDivElement>) {
 		button.style.backgroundColor = condition ? '#1c4995' : 'rgba(0, 0, 0, 0.5)';
@@ -256,7 +157,7 @@ const setButtonBackground = (selectors: string, condition: boolean) => {
 
 const enableOSK = (enable: boolean) => {
 	const theme = `simple-keyboard hg-theme-default cvmDark ${enable ? '' : 'cvmDisabled'} hg-layout-default`;
-	[keyboard, keyboardControlPad, keyboardArrows, keyboardNumPad, keyboardNumPadEnd].forEach((part) => {
+	[kblayout.keyboard, kblayout.keyboardControlPad, kblayout.keyboardArrows, kblayout.keyboardNumPad, kblayout.keyboardNumPadEnd].forEach((part) => {
 		part.setOptions({
 			theme: theme
 		});
@@ -313,8 +214,7 @@ function onKeyPress(button: string) {
 
 	updateOSKStyle();
 }
-
-/* End OSK */
+/* End OSK handling */
 
 let expectedClose = false;
 let turn = -1;
