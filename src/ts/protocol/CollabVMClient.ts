@@ -5,7 +5,7 @@ import { User } from './User.js';
 import { AdminOpcode, Permissions, Rank } from './Permissions.js';
 import TurnStatus from './TurnStatus.js';
 import Mouse from './mouse.js';
-import GetKeysym from '../keyboard.js';
+import GetKeysym from '../keyboard/keysym.js';
 import VoteStatus from './VoteStatus.js';
 import MuteState from './MuteState.js';
 import { StringLike } from '../StringLike.js';
@@ -205,6 +205,7 @@ export default class CollabVMClient {
 	private onBinaryMessage(data: ArrayBuffer) {
 		let msg: CollabVMProtocolMessage;
 		try {
+			//@ts-ignore
 			msg = msgpack.decode(data);
 		} catch {
 			console.error("Server sent invalid binary message");

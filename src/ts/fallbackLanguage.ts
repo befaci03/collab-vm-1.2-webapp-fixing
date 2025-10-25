@@ -7,7 +7,6 @@ const fallbackLanguage : Language = {
 	"author": "Computernewb",
 
 	"stringKeys": {
-		"kGeneric_CollabVM": "CollabVM",
 		"kGeneric_Yes": "Yes",
 		"kGeneric_No": "No",
 		"kGeneric_Ok": "OK",

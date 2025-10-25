@@ -1,11 +1,73 @@
 import Keyboard from 'simple-keyboard';
+import { OSK_buttonToKeysym } from './keysym.js';
+import {VM} from '../main.js';
+
+let shiftHeld = false;
+let ctrlHeld = false;
+let capsHeld = false;
+let altHeld = false;
+let metaHeld = false;
+
+const setButtonBackground = (selectors: string, condition: boolean) => {
+	for (let button of document.querySelectorAll(selectors) as NodeListOf<HTMLDivElement>) {
+		button.style.backgroundColor = condition ? '#1c4995' : 'rgba(0, 0, 0, 0.5)';
+	}
+}
+export const updateOSKStyle = () => {
+	setButtonBackground('.hg-button-shiftleft, .hg-button-shiftright', shiftHeld);
+	setButtonBackground('.hg-button-controlleft, .hg-button-controlright', ctrlHeld);
+	setButtonBackground('.hg-button-capslock', capsHeld);
+	setButtonBackground('.hg-button-altleft, .hg-button-altright', altHeld);
+	setButtonBackground('.hg-button-metaleft, .hg-button-metaright', metaHeld);
+}
+
+function onKeyPress(button: string) {
+	if (VM === null) return;
+	let keysym = OSK_buttonToKeysym(button);
+	if (!keysym) {
+		console.error(`no keysym for ${button}, report this!`);
+		return;
+	}
+
+	switch (true) {
+		case button.startsWith('{shift'):
+			shiftHeld = !shiftHeld;
+			VM.key(keysym, shiftHeld);
+			break;
+		case button.startsWith('{control'):
+			ctrlHeld = !ctrlHeld;
+			VM.key(keysym, ctrlHeld);
+			break;
+		case button === '{capslock}':
+			capsHeld = !capsHeld;
+			VM.key(keysym, capsHeld);
+			break;
+		case button.startsWith('{alt'):
+			altHeld = !altHeld;
+			VM.key(keysym, altHeld);
+			break;
+		case button.startsWith('{meta'):
+			metaHeld = !metaHeld;
+			VM.key(keysym, metaHeld);
+			break;
+		default:
+			VM.key(keysym, true);
+			VM.key(keysym, false);
+	}
+
+	keyboard.setOptions({
+		layoutName: shiftHeld && capsHeld ? 'shiftcaps' : shiftHeld ? 'shift' : capsHeld ? 'capslock' : 'default'
+	});
+
+	updateOSKStyle();
+}
 
 export let commonKeyboardOptions = {
 	onKeyPress: (button: string) => onKeyPress(button),
 	theme: 'simple-keyboard hg-theme-default cvmDark cvmDisabled hg-layout-default',
 	syncInstanceInputs: true,
 	mergeDisplay: true
-};
+}
 
 export let keyboard = new Keyboard('.osk-main', {
 	...commonKeyboardOptions,
@@ -59,7 +121,6 @@ export let keyboard = new Keyboard('.osk-main', {
 		'{metaright}': 'Menu'
 	}
 });
-
 export let keyboardControlPad = new Keyboard('.osk-control', {
 	...commonKeyboardOptions,
 	layout: {
@@ -77,21 +138,18 @@ export let keyboardControlPad = new Keyboard('.osk-control', {
 		'{pagedown}': 'PgDn'
 	}
 });
-
 export let keyboardArrows = new Keyboard('.osk-arrows', {
 	...commonKeyboardOptions,
 	layout: {
 		default: ['{arrowup}', '{arrowleft} {arrowdown} {arrowright}']
 	}
 });
-
 export let keyboardNumPad = new Keyboard('.osk-numpad', {
 	...commonKeyboardOptions,
 	layout: {
 		default: ['{numlock} {numpaddivide} {numpadmultiply}', '{numpad7} {numpad8} {numpad9}', '{numpad4} {numpad5} {numpad6}', '{numpad1} {numpad2} {numpad3}', '{numpad0} {numpaddecimal}']
 	}
 });
-
 export let keyboardNumPadEnd = new Keyboard('.osk-numpadEnd', {
 	...commonKeyboardOptions,
 	layout: {

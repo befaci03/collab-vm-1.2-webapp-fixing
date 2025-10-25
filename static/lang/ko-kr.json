@@ -5,7 +5,6 @@
 	"author": "Johnmacro",
 
 	"stringKeys": {
-		"kGeneric_CollabVM": "CollabVM",
 		"kGeneric_Yes": "예",
 		"kGeneric_No": "아니요",
 		"kGeneric_Ok": "확인",
