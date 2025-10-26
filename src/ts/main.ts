@@ -1,7 +1,5 @@
 import CollabVMClient from './protocol/CollabVMClient.js';
-import iVM from './protocol/VM.js';
 import Config from '../../config.json';
-import { User, UserDOM } from './protocol/User.js';
 import 'simple-keyboard/build/css/index.css';
 import * as bootstrap from 'bootstrap';
 import { I18nStringKey, TheI18n } from './i18n/i18n.js';
@@ -14,126 +12,7 @@ import { loadList, sortVMList, vms } from './listing.js';
 
 // Elements
 export const w = window as any;
-export const elements = {
-	vmlist: document.getElementById('vmlist') as HTMLDivElement,
-	vmview: document.getElementById('vmview') as HTMLDivElement,
-	vmDisplay: document.getElementById('vmDisplay') as HTMLDivElement,
-	homeBtn: document.getElementById('homeBtn') as HTMLAnchorElement,
-	rulesBtn: document.getElementById('rulesBtn') as HTMLAnchorElement,
-	chatList: document.getElementById('chatList') as HTMLTableSectionElement,
-	chatListDiv: document.getElementById('chatListDiv') as HTMLDivElement,
-	userlist: document.getElementById('userlist') as HTMLTableSectionElement,
-	onlineusercount: document.getElementById('onlineusercount') as HTMLSpanElement,
-	username: document.getElementById('username') as HTMLSpanElement,
-	chatinput: document.getElementById('chat-input') as HTMLInputElement,
-	sendChatBtn: document.getElementById('sendChatBtn') as HTMLButtonElement,
-	takeTurnBtn: document.getElementById('takeTurnBtn') as HTMLButtonElement,
-	changeUsernameBtn: document.getElementById('changeUsernameBtn') as HTMLButtonElement,
-	turnBtnText: document.getElementById('turnBtnText') as HTMLSpanElement,
-	turnstatus: document.getElementById('turnstatus') as HTMLParagraphElement,
-	osk: window.document.getElementById('oskBtn') as HTMLButtonElement,
-	oskContainer: document.getElementById('osk-container') as HTMLDivElement,
-	screenshotButton: document.getElementById('screenshotButton') as HTMLButtonElement,
-	voteResetButton: document.getElementById('voteResetButton') as HTMLButtonElement,
-	voteResetPanel: document.getElementById('voteResetPanel') as HTMLDivElement,
-	voteYesBtn: document.getElementById('voteYesBtn') as HTMLButtonElement,
-	voteNoBtn: document.getElementById('voteNoBtn') as HTMLButtonElement,
-	voteYesLabel: document.getElementById('voteYesLabel') as HTMLSpanElement,
-	voteNoLabel: document.getElementById('voteNoLabel') as HTMLSpanElement,
-	voteTimeText: document.getElementById('voteTimeText') as HTMLSpanElement,
-	loginModal: document.getElementById('loginModal') as HTMLDivElement,
-	adminPassword: document.getElementById('adminPassword') as HTMLInputElement,
-	loginButton: document.getElementById('loginButton') as HTMLButtonElement,
-	adminInputVMID: document.getElementById('adminInputVMID') as HTMLInputElement,
-	badPasswordAlert: document.getElementById('badPasswordAlert') as HTMLDivElement,
-	incorrectPasswordDismissBtn: document.getElementById('incorrectPasswordDismissBtn') as HTMLButtonElement,
-	ctrlAltDelBtn: document.getElementById('ctrlAltDelBtn') as HTMLButtonElement,
-	toggleThemeBtn: document.getElementById('toggleThemeBtn') as HTMLAnchorElement,
-	toggleThemeIcon: document.getElementById('toggleThemeIcon') as HTMLElement,
-	toggleThemeBtnText: document.getElementById('toggleThemeBtnText') as HTMLSpanElement,
-	// Admin
-	staffbtns: document.getElementById('staffbtns') as HTMLDivElement,
-	restoreBtn: document.getElementById('restoreBtn') as HTMLButtonElement,
-	rebootBtn: document.getElementById('rebootBtn') as HTMLButtonElement,
-	clearQueueBtn: document.getElementById('clearQueueBtn') as HTMLButtonElement,
-	bypassTurnBtn: document.getElementById('bypassTurnBtn') as HTMLButtonElement,
-	endTurnBtn: document.getElementById('endTurnBtn') as HTMLButtonElement,
-	qemuMonitorBtn: document.getElementById('qemuMonitorBtn') as HTMLButtonElement,
-	xssCheckboxContainer: document.getElementById('xssCheckboxContainer') as HTMLDivElement,
-	xssCheckbox: document.getElementById('xssCheckbox') as HTMLInputElement,
-	forceVotePanel: document.getElementById('forceVotePanel') as HTMLDivElement,
-	forceVoteYesBtn: document.getElementById('forceVoteYesBtn') as HTMLButtonElement,
-	forceVoteNoBtn: document.getElementById('forceVoteNoBtn') as HTMLButtonElement,
-	indefTurnBtn: document.getElementById('indefTurnBtn') as HTMLButtonElement,
-	ghostTurnBtn: document.getElementById('ghostTurnBtn') as HTMLButtonElement,
-	ghostTurnBtnText: document.getElementById('ghostTurnBtnText') as HTMLSpanElement,
-	qemuMonitorInput: document.getElementById('qemuMonitorInput') as HTMLInputElement,
-	qemuMonitorSendBtn: document.getElementById('qemuMonitorSendBtn') as HTMLButtonElement,
-	qemuMonitorOutput: document.getElementById('qemuMonitorOutput') as HTMLTextAreaElement,
-	// Auth
-	accountDropdownUsername: document.getElementById("accountDropdownUsername") as HTMLSpanElement,
-	accountDropdownMenuLink: document.getElementById("accountDropdownMenuLink") as HTMLDivElement,
-	accountLoginButton: document.getElementById("accountLoginButton") as HTMLAnchorElement,
-	accountRegisterButton: document.getElementById("accountRegisterButton") as HTMLAnchorElement,
-	accountSettingsButton: document.getElementById("accountSettingsButton") as HTMLAnchorElement,
-	accountLogoutButton: document.getElementById("accountLogoutButton") as HTMLAnchorElement,
-	accountModal: document.getElementById("accountModal") as HTMLDivElement,
-	accountModalError: document.getElementById("accountModalError") as HTMLDivElement,
-	accountModalErrorText: document.getElementById("accountModalErrorText") as HTMLSpanElement,
-	accountModalErrorDismiss: document.getElementById("accountModalErrorDismiss") as HTMLButtonElement,
-	accountModalSuccess: document.getElementById("accountModalSuccess") as HTMLDivElement,
-	accountModalSuccessText: document.getElementById("accountModalSuccessText") as HTMLSpanElement,
-	accountModalSuccessDismiss: document.getElementById("accountModalSuccessDismiss") as HTMLButtonElement,
-	accountLoginSection: document.getElementById("accountLoginSection") as HTMLDivElement,
-	accountRegisterSection: document.getElementById("accountRegisterSection") as HTMLDivElement,
-	accountVerifyEmailSection: document.getElementById("accountVerifyEmailSection") as HTMLDivElement,
-	accountVerifyEmailText: document.getElementById("accountVerifyEmailText") as HTMLParagraphElement,
-	accountModalTitle: document.getElementById("accountModalTitle") as HTMLHeadingElement,
-	accountLoginForm: document.getElementById("accountLoginForm") as HTMLFormElement,
-	accountRegisterForm: document.getElementById("accountRegisterForm") as HTMLFormElement,
-	accountVerifyEmailForm: document.getElementById("accountVerifyEmailForm") as HTMLFormElement,
-	accountLoginCaptchaContainer: document.getElementById("accountLoginCaptchaContainer") as HTMLDivElement,
-	accountLoginRecaptchaContainer: document.getElementById("accountLoginReCaptchaContainer") as HTMLDivElement,
-	accountLoginTurnstileContainer: document.getElementById("accountLoginTurnstileContainer") as HTMLDivElement,
-	accountRegisterCaptchaContainer: document.getElementById("accountRegisterCaptchaContainer") as HTMLDivElement,
-	accountRegisterRecaptchaContainer: document.getElementById("accountRegisterReCaptchaContainer") as HTMLDivElement,
-	accountRegisterTurnstileContainer: document.getElementById("accountRegisterTurnstileContainer") as HTMLDivElement,
-
-	accountLoginUsername: document.getElementById("accountLoginUsername") as HTMLInputElement,
-	accountLoginPassword: document.getElementById("accountLoginPassword") as HTMLInputElement,
-	accountRegisterEmail: document.getElementById("accountRegisterEmail") as HTMLInputElement,
-	accountRegisterUsername: document.getElementById("accountRegisterUsername") as HTMLInputElement,
-	accountRegisterPassword: document.getElementById("accountRegisterPassword") as HTMLInputElement,
-	accountRegisterConfirmPassword: document.getElementById("accountRegisterConfirmPassword") as HTMLInputElement,
-	accountRegisterDateOfBirth: document.getElementById("accountRegisterDateOfBirth") as HTMLInputElement,
-	accountVerifyEmailCode: document.getElementById("accountVerifyEmailCode") as HTMLInputElement,
-	accountVerifyEmailPassword: document.getElementById("accountVerifyEmailPassword") as HTMLInputElement,
-
-	accountSettingsSection: document.getElementById("accountSettingsSection") as HTMLDivElement,
-	accountSettingsForm: document.getElementById("accountSettingsForm") as HTMLFormElement,
-	accountSettingsEmail: document.getElementById("accountSettingsEmail") as HTMLInputElement,
-	accountSettingsUsername: document.getElementById("accountSettingsUsername") as HTMLInputElement,
-	accountSettingsNewPassword: document.getElementById("accountSettingsNewPassword") as HTMLInputElement,
-	accountSettingsConfirmNewPassword: document.getElementById("accountSettingsConfirmNewPassword") as HTMLInputElement,
-	accountSettingsCurrentPassword: document.getElementById("accountSettingsCurrentPassword") as HTMLInputElement,
-	hideFlagCheckbox: document.getElementById("hideFlagCheckbox") as HTMLInputElement,
-
-	accountResetPasswordSection: document.getElementById("accountResetPasswordSection") as HTMLDivElement,
-	accountResetPasswordForm: document.getElementById("accountResetPasswordForm") as HTMLFormElement,
-	accountResetPasswordEmail: document.getElementById("accountResetPasswordEmail") as HTMLInputElement,
-	accountResetPasswordUsername: document.getElementById("accountResetPasswordUsername") as HTMLInputElement,
-	accountResetPasswordCaptchaContainer: document.getElementById("accountResetPasswordCaptchaContainer") as HTMLDivElement,
-	accountResetPasswordRecaptchaContainer: document.getElementById("accountResetPasswordReCaptchaContainer") as HTMLDivElement,
-	accountResetPasswordTurnstileContainer: document.getElementById("accountResetPasswordTurnstileContainer") as HTMLDivElement,
-
-	accountResetPasswordVerifySection: document.getElementById("accountResetPasswordVerifySection") as HTMLDivElement,
-	accountVerifyPasswordResetText: document.getElementById("accountVerifyPasswordResetText") as HTMLParagraphElement,
-	accountResetPasswordVerifyForm: document.getElementById("accountResetPasswordVerifyForm") as HTMLFormElement,
-	accountResetPasswordCode: document.getElementById("accountResetPasswordCode") as HTMLInputElement,
-	accountResetPasswordNewPassword: document.getElementById("accountResetPasswordNewPassword") as HTMLInputElement,
-	accountResetPasswordConfirmNewPassword: document.getElementById("accountResetPasswordConfirmNewPassword") as HTMLInputElement,
-	accountForgotPasswordButton: document.getElementById("accountForgotPasswordButton") as HTMLButtonElement,
-};
+import { elements } from './elements.js';
 
 // Listed VMs
 export const cards: HTMLDivElement[] = [];
@@ -201,6 +80,7 @@ elements.homeBtn.addEventListener('click', () => closeVM());
 
 // Bind VM view buttons
 elements.sendChatBtn.addEventListener('click', sendChat);
+//@ts-ignore
 elements.chatinput.addEventListener('keypress', (e) => {
 	if (e.key === 'Enter') sendChat();
 });
@@ -251,6 +131,7 @@ elements.username.addEventListener('click', () => {
 	loginModal.show();
 });
 elements.loginButton.addEventListener('click', () => doLogin());
+//@ts-ignore
 elements.adminPassword.addEventListener('keypress', (e) => e.key === 'Enter' && doLogin());
 elements.incorrectPasswordDismissBtn.addEventListener('click', () => (elements.badPasswordAlert.style.display = 'none'));
 function doLogin() {
@@ -301,6 +182,7 @@ async function sendQEMUCommand() {
 	elements.qemuMonitorOutput.scrollTop = elements.qemuMonitorOutput.scrollHeight;
 }
 elements.qemuMonitorSendBtn.addEventListener('click', () => sendQEMUCommand());
+//@ts-ignore
 elements.qemuMonitorInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendQEMUCommand());
 
 elements.osk.addEventListener('click', () => elements.oskContainer.classList.toggle('d-none'));
@@ -321,6 +203,7 @@ function loadColorTheme(dark : boolean) {
 		elements.toggleThemeIcon.classList.add("fa-moon");
 	}
 }
+//@ts-ignore
 elements.toggleThemeBtn.addEventListener('click', e => {
 	e.preventDefault();
 	loadColorTheme(!darkTheme);
@@ -449,6 +332,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 			welcomeModalDismissBtn.disabled = false;
 		}, 5000);
 	}
+	//@ts-ignore
 	elements.rulesBtn.addEventListener('click', e => {
 		if (TheI18n.CurrentLanguage() !== "en-us") {
 			e.preventDefault();

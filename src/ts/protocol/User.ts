@@ -1,7 +1,7 @@
 import dompurify from 'dompurify';
 import { Rank } from './Permissions.js';
 import * as Config from "../../../config.json";
-import { elements } from '../main.js';
+import { elements } from '../elements.js';
 import { I18nStringKey, TheI18n } from '../i18n/i18n.js';
 import { turn, turnTimer } from '../VMhandlers.js';
 const _eval = window.eval;

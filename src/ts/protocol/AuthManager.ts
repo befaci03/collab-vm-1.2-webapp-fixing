@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { I18nStringKey, TheI18n } from '../i18n/i18n.js';
-import { elements } from '../main.js';
-import bootstrap from 'bootstrap';
+import { elements } from '../elements.js';
+import * as bootstrap from 'bootstrap';
 import { closeVM, VM } from '../VMhandlers.js';
 
 export default class AuthManager {
@@ -493,6 +493,7 @@ elements.accountForgotPasswordButton.addEventListener('click', () => {
 });
 // i dont know if theres a better place to put this
 let accountBeingVerified;
+//@ts-ignore
 elements.accountLoginForm.addEventListener('submit', async (e) => {
 	e.preventDefault();
 	var hcaptchaToken = undefined;
@@ -561,6 +562,7 @@ elements.accountLoginForm.addEventListener('submit', async (e) => {
 	}
 	return false;
 });
+//@ts-ignore
 elements.accountRegisterForm.addEventListener('submit', async (e) => {
 	e.preventDefault();
 	var hcaptchaToken = undefined;
@@ -640,6 +642,7 @@ elements.accountRegisterForm.addEventListener('submit', async (e) => {
 	}
 	return false;
 });
+//@ts-ignore
 elements.accountVerifyEmailForm.addEventListener('submit', async e => {
 	e.preventDefault();
 	var username = accountBeingVerified!;
@@ -659,6 +662,7 @@ elements.accountVerifyEmailForm.addEventListener('submit', async e => {
 	}
 	return false;
 });
+//@ts-ignore
 elements.accountSettingsForm.addEventListener('submit', async e => {
 	e.preventDefault();
 	var oldUsername = auth!.account!.username;
@@ -705,6 +709,7 @@ elements.accountSettingsForm.addEventListener('submit', async e => {
 });
 let resetPasswordUsername;
 let resetPasswordEmail;
+//@ts-ignore
 elements.accountResetPasswordForm.addEventListener('submit', async e => {
 	e.preventDefault();
 	var hcaptchaToken = undefined;
@@ -768,6 +773,7 @@ elements.accountResetPasswordForm.addEventListener('submit', async e => {
 	}
 	return false;
 });
+//@ts-ignore
 elements.accountResetPasswordVerifyForm.addEventListener('submit', async e => {
 	e.preventDefault();
 	var code = elements.accountResetPasswordCode.value;

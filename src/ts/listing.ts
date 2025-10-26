@@ -1,7 +1,8 @@
-import { cards, elements, multicollab, w } from "./main.js";
+import { cards, multicollab, w } from "./main.js";
 import Config from '../../config.json';
 import { openVM, users } from "./VMhandlers.js";
 import iVM from "./protocol/VM.js";
+import { elements } from "./elements.js";
 
 export const vms: iVM[] = [];
 export async function loadList() {

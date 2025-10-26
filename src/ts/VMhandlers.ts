@@ -1,7 +1,7 @@
 export let VM: CollabVMClient | null = null;
 import CollabVMClient from "./protocol/CollabVMClient.js";
 import { Format } from './utils/format.js';
-import { elements, w } from "./main.js";
+import { w } from "./main.js";
 import { I18nStringKey, TheI18n } from "./i18n/i18n.js";
 import TurnStatus from './protocol/states/TurnState.js';
 import * as kblayout from './keyboard/layout.js';
@@ -13,6 +13,7 @@ import MuteState from './protocol/states/MuteState.js';
 import AuthManager, { auth, renderAuth, resetAuthVar } from "./protocol/AuthManager.js";
 import iVM from "./protocol/VM.js";
 import { sortUserList } from "./listing.js";
+import { elements } from "./elements.js";
 let expectedClose: boolean = false;
 
 let rank: Rank = Rank.Unregistered;
