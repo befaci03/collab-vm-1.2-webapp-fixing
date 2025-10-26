@@ -1,6 +1,9 @@
 import dompurify from 'dompurify';
 import { Rank } from './Permissions.js';
 import * as Config from "../../../config.json";
+import { elements } from '../main.js';
+import { I18nStringKey, TheI18n } from '../i18n/i18n.js';
+import { turn, turnTimer } from '../VMhandlers.js';
 const _eval = window.eval;
 
 export class User {
@@ -16,9 +19,15 @@ export class User {
 		this.turn = -1;
 	}
 }
+export type UserDOM = {
+	user: User;
+	usernameElement: HTMLSpanElement;
+	flagElement: HTMLSpanElement;
+	element: HTMLTableRowElement;
+};
 
 const chatsound = new Audio(Config.ChatSound);
-export function chatMessage(_:any, username: string, message: string) {
+export function chatMessage(username: string, message: string) {
 	let tr = document.createElement('tr');
 	let td = document.createElement('td');
 	if (!Config.RawMessages.Messages) message = dompurify.sanitize(message);
@@ -62,7 +71,17 @@ export function chatMessage(_:any, username: string, message: string) {
 		}
 	});
 	tr.appendChild(td);
-	_.elements.chatList.appendChild(tr);
-	_.elements.chatListDiv.scrollTop = _.elements.chatListDiv.scrollHeight;
+	elements.chatList.appendChild(tr);
+	elements.chatListDiv.scrollTop = elements.chatListDiv.scrollHeight;
 	chatsound.play();
+}
+
+function getFlagEmoji(countryCode: string) {
+	if (countryCode.length !== 2) throw new Error('Invalid country code');
+	return String.fromCodePoint(...countryCode.toUpperCase().split('').map(char =>  127397 + char.charCodeAt(0)));
+}
+
+function setTurnStatus() {
+	if (turn === 0) elements.turnstatus.innerText = TheI18n.GetString(I18nStringKey.kVM_TurnTimeTimer, turnTimer);
+	else elements.turnstatus.innerText = TheI18n.GetString(I18nStringKey.kVM_WaitingTurnTimer, turnTimer);
 }

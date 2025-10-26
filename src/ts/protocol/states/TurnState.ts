@@ -1,4 +1,4 @@
-import { User } from './User.js';
+import { User } from '../User.js';
 
 export default interface TurnStatus {
 	// The user currently taking their turn

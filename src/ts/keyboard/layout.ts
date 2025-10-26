@@ -1,6 +1,6 @@
 import Keyboard from 'simple-keyboard';
 import { OSK_buttonToKeysym } from './keysym.js';
-import {VM} from '../main.js';
+import { VM } from '../VMhandlers.js';
 
 let shiftHeld = false;
 let ctrlHeld = false;

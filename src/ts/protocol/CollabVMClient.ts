@@ -1,14 +1,14 @@
 import { createNanoEvents, Emitter, DefaultEvents, Unsubscribe } from 'nanoevents';
-import * as Guacutils from './Guacutils.js';
+import * as Guacutils from '../utils/Guacutils.js';
 import VM from './VM.js';
 import { User } from './User.js';
 import { AdminOpcode, Permissions, Rank } from './Permissions.js';
-import TurnStatus from './TurnStatus.js';
+import TurnStatus from './states/TurnState.js';
 import Mouse from './mouse.js';
 import GetKeysym from '../keyboard/keysym.js';
 import VoteStatus from './states/VoteState.js';
 import MuteState from './states/MuteState.js';
-import { StringLike } from '../StringLike.js';
+import { StringLike } from '../utils/StringLike.js';
 import * as msgpack from 'msgpackr';
 // TODO: Properly workspaceify this
 import { CollabVMProtocolMessage, CollabVMProtocolMessageType } from '../../../collab-vm-1.2-binary-protocol/src/index.js';

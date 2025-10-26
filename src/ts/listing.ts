@@ -1,6 +1,9 @@
-import { multicollab } from "./main.js";
+import { cards, elements, multicollab, w } from "./main.js";
 import Config from '../../config.json';
+import { openVM, users } from "./VMhandlers.js";
+import iVM from "./protocol/VM.js";
 
+export const vms: iVM[] = [];
 export async function loadList() {
 	var jsonVMs = Config.ServerAddressesListURI === null ? [] : await (await fetch(Config.ServerAddressesListURI)).json();
 	await Promise.all(
@@ -25,7 +28,6 @@ export function sortVMList() {
 	elements.vmlist.children[0].innerHTML = '';
 	cards.forEach((c) => elements.vmlist.children[0].appendChild(c));
 }
-
 export function sortUserList() {
 	users.sort((a, b) => {
 		if (a.user.username === w.username && a.user.turn >= b.user.turn && b.user.turn !== 0) return -1;

@@ -1,19 +1,31 @@
 export let VM: CollabVMClient | null = null;
-import CollabVMClient from "./protocol/CollabVMClient";
-import { Format } from './format.js';
-import { elements } from "./main";
-import { TheI18n } from "./i18n/i18n";
-import TurnStatus from './protocol/TurnStatus.js';
+import CollabVMClient from "./protocol/CollabVMClient.js";
+import { Format } from './utils/format.js';
+import { elements, w } from "./main.js";
+import { I18nStringKey, TheI18n } from "./i18n/i18n.js";
+import TurnStatus from './protocol/states/TurnState.js';
 import * as kblayout from './keyboard/layout.js';
-import { User, chatMessage } from './protocol/User.js';
+import { User, UserDOM, chatMessage } from './protocol/User.js';
+import { Permissions, Rank } from './protocol/Permissions.js';
 import VoteStatus from './protocol/states/VoteState.js';
 import * as Config from "../../config.json";
-
+import MuteState from './protocol/states/MuteState.js';
+import AuthManager, { auth, renderAuth, resetAuthVar } from "./protocol/AuthManager.js";
+import iVM from "./protocol/VM.js";
+import { sortUserList } from "./listing.js";
 let expectedClose: boolean = false;
 
+let rank: Rank = Rank.Unregistered;
+let perms: Permissions = new Permissions(0);
+
+export const users: UserDOM[] = [];
 
 let turnInterval: number | undefined = undefined;
 let voteInterval: number | undefined = undefined;
+
+export let turn: number = -1;
+export let turnTimer: number = 0;
+export let voteTimer: number = 0;
 
 const enableOSK = (enable: boolean) => {
 	const theme = `simple-keyboard hg-theme-default cvmDark ${enable ? '' : 'cvmDisabled'} hg-layout-default`;
@@ -26,7 +38,7 @@ const enableOSK = (enable: boolean) => {
 	if (enable) kblayout.updateOSKStyle();
 };
 
-export async function openVM(elements:any, vm: typeof VM): Promise<void> {
+export async function openVM(vm: iVM): Promise<void> {
 	// If there's an active VM it must be closed before opening another
 	if (VM !== null) return;
 	expectedClose = false;
@@ -76,6 +88,7 @@ export async function openVM(elements:any, vm: typeof VM): Promise<void> {
 		if (Config.Auth.Enabled && Config.Auth.APIEndpoint === server && auth!.account) {
 			VM!.loginAccount(auth!.account.sessionToken);
 		} else if (!Config.Auth.Enabled || Config.Auth.APIEndpoint !== server) {
+			//@ts-ignore
 			auth = new AuthManager(server);
 			await renderAuth();
 		}
@@ -150,10 +163,10 @@ export function closeVM() {
 	elements.changeUsernameBtn.style.display = "inline-block";
 	// Reset auth if it was changed by the VM
 	if (Config.Auth.Enabled && auth?.apiEndpoint !== Config.Auth.APIEndpoint) {
-		auth = new AuthManager(Config.Auth.APIEndpoint);
+		resetAuthVar(new AuthManager(Config.Auth.APIEndpoint));
 		renderAuth();
 	} else if (auth && !Config.Auth.Enabled) {
-		auth = null;
+		resetAuthVar(null);
 		elements.accountDropdownMenuLink.style.display = "none";
 	}
 }
@@ -296,3 +309,79 @@ function turnIntervalCb() {
 	turnTimer--;
 	setTurnStatus();
 }
+
+function onLogin(_rank: Rank, _perms: Permissions) {
+	rank = _rank;
+	perms = _perms;
+	elements.username.classList.remove('username-unregistered', 'username-registered');
+	if (rank === Rank.Admin) elements.username.classList.add('username-admin');
+	if (rank === Rank.Moderator) elements.username.classList.add('username-moderator');
+	if (rank === Rank.Registered) elements.username.classList.add('username-registered');
+	elements.staffbtns.style.display = 'block';
+	if (_perms.restore) elements.restoreBtn.style.display = 'inline-block';
+	if (_perms.reboot) elements.rebootBtn.style.display = 'inline-block';
+	if (_perms.bypassturn) {
+		elements.bypassTurnBtn.style.display = 'inline-block';
+		elements.endTurnBtn.style.display = 'inline-block';
+		elements.clearQueueBtn.style.display = 'inline-block';
+	}
+	if (_rank === Rank.Admin) {
+		elements.qemuMonitorBtn.style.display = 'inline-block';
+		elements.indefTurnBtn.style.display = 'inline-block';
+		elements.ghostTurnBtn.style.display = 'inline-block';
+	}
+	if (_perms.xss) elements.xssCheckboxContainer.style.display = 'inline-block';
+	if (_perms.forcevote) elements.forceVotePanel.style.display = 'block';
+	if (rank !== Rank.Registered)
+		for (const user of users) userModOptions(user);
+}
+
+function userModOptions(user: { user: User; element: HTMLTableRowElement }) {
+	let tr = user.element;
+	let td = tr.children[0] as HTMLTableCellElement;
+	tr.classList.add('dropdown');
+	td.classList.add('dropdown-toggle');
+	td.setAttribute('data-bs-toggle', 'dropdown');
+	td.setAttribute('role', 'button');
+	td.setAttribute('aria-expanded', 'false');
+	let ul = document.createElement('ul');
+	ul.classList.add('dropdown-menu', 'dropdown-menu-dark', 'table-dark', 'text-light');
+	if (perms.bypassturn) addUserDropdownItem(ul, TheI18n.GetString(I18nStringKey.kVMButtons_EndTurn), () => VM!.endTurn(user.user.username), "mod-end-turn-btn");
+	if (perms.ban) addUserDropdownItem(ul, TheI18n.GetString(I18nStringKey.kAdminVMButtons_Ban), () => VM!.ban(user.user.username), "mod-ban-btn");
+	if (perms.kick) addUserDropdownItem(ul, TheI18n.GetString(I18nStringKey.kAdminVMButtons_Kick), () => VM!.kick(user.user.username), "mod-kick-btn");
+	if (perms.rename)
+		addUserDropdownItem(ul, TheI18n.GetString(I18nStringKey.kVMButtons_ChangeUsername), () => {
+			let newname = prompt(TheI18n.GetString(I18nStringKey.kVMPrompts_AdminChangeUsernamePrompt, user.user.username));
+			if (!newname) return;
+			VM!.renameUser(user.user.username, newname);
+		}, "mod-rename-btn");
+	if (perms.mute) {
+		addUserDropdownItem(ul, TheI18n.GetString(I18nStringKey.kAdminVMButtons_TempMute), () => VM!.mute(user.user.username, MuteState.Temp), "mod-temp-mute-btn");
+		addUserDropdownItem(ul, TheI18n.GetString(I18nStringKey.kAdminVMButtons_IndefMute), () => VM!.mute(user.user.username, MuteState.Perma), "mod-indef-mute-btn");
+		addUserDropdownItem(ul, TheI18n.GetString(I18nStringKey.kAdminVMButtons_Unmute), () => VM!.mute(user.user.username, MuteState.Unmuted), "mod-unmute-btn");
+	}
+	if (perms.grabip)
+		addUserDropdownItem(ul, TheI18n.GetString(I18nStringKey.kAdminVMButtons_GetIP), async () => {
+			let ip = await VM!.getip(user.user.username);
+			alert(ip);
+		}, "mod-get-ip-btn");
+	tr.appendChild(ul);
+}
+function addUserDropdownItem(ul: HTMLUListElement, text: string, func: () => void, classname: string) {
+	let li = document.createElement('li');
+	let a = document.createElement('a');
+	a.href = '#';
+	a.classList.add('dropdown-item', classname);
+	a.innerHTML = text;
+	a.addEventListener('click', () => func());
+	li.appendChild(a);
+	ul.appendChild(li);
+}
+function getFlagEmoji(countryCode: string): string {
+	throw new Error("Function not implemented.");
+}
+
+function setTurnStatus() {
+	throw new Error("Function not implemented.");
+}
+

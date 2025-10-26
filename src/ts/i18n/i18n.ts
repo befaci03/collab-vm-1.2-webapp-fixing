@@ -1,5 +1,5 @@
-import { StringLike } from '../StringLike';
-import { Format } from '../format';
+import { StringLike } from '../utils/StringLike';
+import { Format } from '../utils/format';
 import { Emitter, Unsubscribe, createNanoEvents } from 'nanoevents';
 import Config from '../../../config.json';
 

@@ -1,4 +1,4 @@
-export default interface VM {
+export default interface iVM {
 	url: string;
 	id: string;
 	displayName: string;
