@@ -1,7 +1,7 @@
-import { StringLike } from './StringLike';
-import { Format } from './format';
+import { StringLike } from '../StringLike';
+import { Format } from '../format';
 import { Emitter, Unsubscribe, createNanoEvents } from 'nanoevents';
-import Config from '../../config.json';
+import Config from '../../../config.json';
 
 /// All string keys.
 export enum I18nStringKey {

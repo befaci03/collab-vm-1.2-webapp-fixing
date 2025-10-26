@@ -3,18 +3,15 @@ import VM from './protocol/VM.js';
 import Config from '../../config.json';
 import { Permissions, Rank } from './protocol/Permissions.js';
 import { User } from './protocol/User.js';
-import TurnStatus from './protocol/TurnStatus.js';
-import * as kblayout from './keyboard/layout.js';
 import 'simple-keyboard/build/css/index.css';
-import VoteStatus from './protocol/VoteStatus.js';
 import * as bootstrap from 'bootstrap';
 import MuteState from './protocol/MuteState.js';
-import { I18nStringKey, TheI18n } from './i18n.js';
+import { I18nStringKey, TheI18n } from './i18n/i18n.js';
 import { Format } from './format.js';
-import AuthManager from './AuthManager.js';
+
+import AuthManager from './protocol/AuthManager.js';
 import dayjs from 'dayjs';
 import * as dompurify from 'dompurify';
-const _eval = window.eval;
 
 // Elements
 const w = window as any;
@@ -141,17 +138,6 @@ export const elements = {
 
 let auth : AuthManager|null = null;
 
-const enableOSK = (enable: boolean) => {
-	const theme = `simple-keyboard hg-theme-default cvmDark ${enable ? '' : 'cvmDisabled'} hg-layout-default`;
-	[kblayout.keyboard, kblayout.keyboardControlPad, kblayout.keyboardArrows, kblayout.keyboardNumPad, kblayout.keyboardNumPadEnd].forEach((part) => {
-		part.setOptions({
-			theme: theme
-		});
-	});
-
-	if (enable) kblayout.updateOSKStyle();
-};
-
 let turn: number = -1;
 // Listed VMs
 const vms: VM[] = [];
@@ -162,16 +148,10 @@ const users: {
 	flagElement: HTMLSpanElement;
 	element: HTMLTableRowElement;
 }[] = [];
-let turnInterval: number | undefined = undefined;
-let voteInterval: number | undefined = undefined;
 let turnTimer = 0;
 let voteTimer = 0;
 let rank: Rank = Rank.Unregistered;
 let perms: Permissions = new Permissions(0);
-const chatsound = new Audio(Config.ChatSound);
-
-// Active VM
-export let VM: CollabVMClient | null = null;
 
 export async function multicollab(url: string) {
 	// Create the client
@@ -224,194 +204,9 @@ export async function multicollab(url: string) {
 	}
 }
 
-export function chatMessage(username: string, message: string) {
-	let tr = document.createElement('tr');
-	let td = document.createElement('td');
-	if (!Config.RawMessages.Messages) message = dompurify.sanitize(message);
-	// System message
-	if (username === '') td.innerHTML = message;
-	else {
-		let user = VM!.getUsers().find((u) => u.username === username);
-		let rank;
-		if (user !== undefined) rank = user.rank;
-		else rank = Rank.Unregistered;
-		let userclass;
-		let msgclass;
-		switch (rank) {
-			case Rank.Unregistered:
-				userclass = 'chat-username-unregistered';
-				msgclass = 'chat-unregistered';
-				break;
-			case Rank.Registered:
-				userclass = 'chat-username-registered';
-				msgclass = 'chat-registered';
-				break;
-			case Rank.Admin:
-				userclass = 'chat-username-admin';
-				msgclass = 'chat-admin';
-				break;
-			case Rank.Moderator:
-				userclass = 'chat-username-moderator';
-				msgclass = 'chat-moderator';
-				break;
-		}
-		tr.classList.add(msgclass);
-		td.innerHTML = `<b class="${userclass}">${username}▸</b> ${message}`;
-	}
-	// hacky way to allow scripts
-	if (Config.RawMessages.Messages) Array.prototype.slice.call(td.children).forEach((curr) => {
-		if (curr.nodeName === 'SCRIPT') {
-			_eval(curr.text);
-		}
-	});
-	tr.appendChild(td);
-	elements.chatList.appendChild(tr);
-	elements.chatListDiv.scrollTop = elements.chatListDiv.scrollHeight;
-	chatsound.play();
-}
-
-function addUser(user: User) {
-	let olduser = users.find((u) => u.user === user);
-	if (olduser !== undefined) elements.userlist.removeChild(olduser.element);
-	let tr = document.createElement('tr');
-	tr.setAttribute('data-cvm-turn', '-1');
-	let td = document.createElement('td');
-	let flagSpan = document.createElement('span');
-	let usernameSpan = document.createElement('span');
-	flagSpan.classList.add("userlist-flag");
-	usernameSpan.classList.add("userlist-username");
-	td.appendChild(flagSpan);
-	if (user.countryCode !== null) {
-		flagSpan.innerHTML = getFlagEmoji(user.countryCode);
-		flagSpan.title = TheI18n.getCountryName(user.countryCode);
-	};
-	td.appendChild(usernameSpan);
-	usernameSpan.innerText = user.username;
-	switch (user.rank) {
-		case Rank.Admin:
-			tr.classList.add('user-admin');
-			break;
-		case Rank.Moderator:
-			tr.classList.add('user-moderator');
-			break;
-		case Rank.Registered:
-			tr.classList.add('user-registered');
-			break;
-		case Rank.Unregistered:
-			tr.classList.add('user-unregistered');
-			break;
-	}
-	if (user.username === w.username) tr.classList.add('user-current');
-	tr.appendChild(td);
-	let u = { user: user, element: tr, usernameElement: usernameSpan, flagElement: flagSpan };
-	if (rank === Rank.Admin || rank === Rank.Moderator) userModOptions(u);
-	elements.userlist.appendChild(tr);
-	if (olduser !== undefined) olduser.element = tr;
-	else users.push(u);
-	elements.onlineusercount.innerHTML = VM!.getUsers().length.toString();
-}
-
-function remUser(user: User) {
-	let olduser = users.findIndex((u) => u.user === user);
-	if (olduser !== undefined) elements.userlist.removeChild(users[olduser].element);
-	elements.onlineusercount.innerHTML = VM!.getUsers().length.toString();
-	users.splice(olduser, 1);
-}
-
 function getFlagEmoji(countryCode: string) {
 	if (countryCode.length !== 2) throw new Error('Invalid country code');
 	return String.fromCodePoint(...countryCode.toUpperCase().split('').map(char =>  127397 + char.charCodeAt(0)));
-}
-
-function flag() {
-	for (let user of users.filter(u => u.user.countryCode !== null)) {
-		user.flagElement.innerHTML = getFlagEmoji(user.user.countryCode!);
-		user.flagElement.title = TheI18n.getCountryName(user.user.countryCode!);
-	}
-}
-
-function userRenamed(oldname: string, newname: string, selfrename: boolean) {
-	let user = users.find((u) => u.user.username === newname);
-	if (user) {
-		user.usernameElement.innerHTML = newname;
-	}
-	if (selfrename) {
-		w.username = newname;
-		elements.username.innerText = newname;
-		localStorage.setItem('username', newname);
-	}
-}
-
-function turnUpdate(status: TurnStatus) {
-	// Clear all turn data
-	turn = -1;
-	VM!.canvas.classList.remove('focused', 'waiting');
-	clearInterval(turnInterval);
-	turnTimer = 0;
-	for (const user of users) {
-		user.element.classList.remove('user-turn', 'user-waiting');
-		user.element.setAttribute('data-cvm-turn', '-1');
-	}
-	elements.turnBtnText.innerHTML = TheI18n.GetString(I18nStringKey.kVMButtons_TakeTurn);
-	enableOSK(false);
-
-	if (status.user !== null) {
-		let el = users.find((u) => u.user === status.user)!.element;
-		el!.classList.add('user-turn');
-		el!.setAttribute('data-cvm-turn', '0');
-	}
-	for (const user of status.queue) {
-		let el = users.find((u) => u.user === user)!.element;
-		el!.classList.add('user-waiting');
-		el.setAttribute('data-cvm-turn', status.queue.indexOf(user).toString(10));
-	}
-	if (status.user?.username === w.username) {
-		turn = 0;
-		turnTimer = status.turnTime! / 1000;
-		elements.turnBtnText.innerHTML = TheI18n.GetString(I18nStringKey.kVMButtons_EndTurn);
-		VM!.canvas.classList.add('focused');
-		enableOSK(true);
-	}
-	if (status.queue.some((u) => u.username === w.username)) {
-		turn = status.queue.findIndex((u) => u.username === w.username) + 1;
-		turnTimer = status.queueTime! / 1000;
-		elements.turnBtnText.innerHTML = TheI18n.GetString(I18nStringKey.kVMButtons_EndTurn);
-		VM!.canvas.classList.add('waiting');
-	}
-	if (turn === -1) elements.turnstatus.innerText = '';
-	else {
-		//@ts-ignore
-		turnInterval = setInterval(() => turnIntervalCb(), 1000);
-		setTurnStatus();
-	}
-	sortUserList();
-}
-
-function voteUpdate(status: VoteStatus) {
-	clearInterval(voteInterval);
-	elements.voteResetPanel.style.display = 'block';
-	elements.voteYesLabel.innerText = status.yesVotes.toString();
-	elements.voteNoLabel.innerText = status.noVotes.toString();
-	voteTimer = Math.floor(status.timeToEnd / 1000);
-	//@ts-ignore
-	voteInterval = setInterval(() => updateVoteEndTime(), 1000);
-	updateVoteEndTime();
-}
-
-function updateVoteEndTime() {
-	voteTimer--;
-	elements.voteTimeText.innerText = TheI18n.GetString(I18nStringKey.kVM_VoteForResetTimer, voteTimer);
-	if (voteTimer === 0) clearInterval(voteInterval);
-}
-
-function voteEnd() {
-	clearInterval(voteInterval);
-	elements.voteResetPanel.style.display = 'none';
-}
-
-function turnIntervalCb() {
-	turnTimer--;
-	setTurnStatus();
 }
 
 function setTurnStatus() {
