@@ -3,7 +3,7 @@ import { Rank } from './Permissions.js';
 import * as Config from "../../../config.json";
 import { elements } from '../elements.js';
 import { I18nStringKey, TheI18n } from '../i18n/i18n.js';
-import { turn, turnTimer } from '../VMhandlers.js';
+import { turn, turnTimer, VM } from '../VMhandlers.js';
 const _eval = window.eval;
 
 export class User {
@@ -24,7 +24,7 @@ export type UserDOM = {
 	usernameElement: HTMLSpanElement;
 	flagElement: HTMLSpanElement;
 	element: HTMLTableRowElement;
-};
+}
 
 const chatsound = new Audio(Config.ChatSound);
 export function chatMessage(username: string, message: string) {
@@ -34,8 +34,7 @@ export function chatMessage(username: string, message: string) {
 	// System message
 	if (username === '') td.innerHTML = message;
 	else {
-		//@ts-ignore
-		let user = _.VM!.getUsers().find((u) => u.username === username);
+		let user = VM!.getUsers().find((u) => u.username === username);
 		let rank;
 		if (user !== undefined) rank = user.rank;
 		else rank = Rank.Unregistered;
@@ -76,12 +75,11 @@ export function chatMessage(username: string, message: string) {
 	chatsound.play();
 }
 
-function getFlagEmoji(countryCode: string) {
-	if (countryCode.length !== 2) throw new Error('Invalid country code');
+export function getFlagEmoji(countryCode: string) {
+	if (countryCode.length !== 2 ) throw new Error('Invalid country code');
 	return String.fromCodePoint(...countryCode.toUpperCase().split('').map(char =>  127397 + char.charCodeAt(0)));
 }
-
-function setTurnStatus() {
+export function setTurnStatus() {
 	if (turn === 0) elements.turnstatus.innerText = TheI18n.GetString(I18nStringKey.kVM_TurnTimeTimer, turnTimer);
 	else elements.turnstatus.innerText = TheI18n.GetString(I18nStringKey.kVM_WaitingTurnTimer, turnTimer);
 }

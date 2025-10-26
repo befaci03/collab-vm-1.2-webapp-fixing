@@ -5,7 +5,7 @@ import { w } from "./main.js";
 import { I18nStringKey, TheI18n } from "./i18n/i18n.js";
 import TurnStatus from './protocol/states/TurnState.js';
 import * as kblayout from './keyboard/layout.js';
-import { User, UserDOM, chatMessage } from './protocol/User.js';
+import { User, UserDOM, chatMessage, getFlagEmoji, setTurnStatus } from './protocol/User.js';
 import { Permissions, Rank } from './protocol/Permissions.js';
 import VoteStatus from './protocol/states/VoteState.js';
 import * as Config from "../../config.json";
@@ -378,11 +378,3 @@ function addUserDropdownItem(ul: HTMLUListElement, text: string, func: () => voi
 	li.appendChild(a);
 	ul.appendChild(li);
 }
-function getFlagEmoji(countryCode: string): string {
-	throw new Error("Function not implemented.");
-}
-
-function setTurnStatus() {
-	throw new Error("Function not implemented.");
-}
-

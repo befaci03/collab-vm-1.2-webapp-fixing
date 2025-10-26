@@ -36,8 +36,17 @@
   overflow-y: auto;
   border: 1px solid #575757;
 }
+
+#turnstatus {
+  z-index: 0;
+  padding: 5px 8px;
+  position: absolute;
+  user-select: none;
+  transform: translateX(200%) translateY(-24px);
+}
 .chat-table {
   height: 30vh;
+  padding-top: 2em;
 }
 
 .username-table {

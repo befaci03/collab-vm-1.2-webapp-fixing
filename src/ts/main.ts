@@ -1,4 +1,4 @@
-import CollabVMClient from './protocol/CollabVMClient.js';
+import CollabVMClient, { CollabVMClientEvents } from './protocol/CollabVMClient.js';
 import Config from '../../config.json';
 import 'simple-keyboard/build/css/index.css';
 import * as bootstrap from 'bootstrap';
@@ -125,7 +125,7 @@ elements.username.addEventListener('click', () => {
 	if (auth) return;
 	if (!usernameClick) {
 		usernameClick = true;
-		setInterval(() => (usernameClick = false), 1000);
+		setInterval(() => (usernameClick = false), 1300);
 		return;
 	}
 	loginModal.show();
@@ -250,12 +250,11 @@ w.GetAdmin = () => {
 };
 // more backwards compatibility
 w.cvmEvents = {
-	on: (event: string | number, cb: (...args: any) => void) => {
+	on: (event: keyof CollabVMClientEvents, cb: (...args: any) => void) => {
 		if (VM === null) return;
-		VM.on('message', (...args: any) => cb(...args));
+		VM.on(event, (...args: any) => cb(...args));
 	}
 };
-w.VMName = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
 	// Initalize the i18n system
@@ -334,9 +333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	}
 	//@ts-ignore
 	elements.rulesBtn.addEventListener('click', e => {
-		if (TheI18n.CurrentLanguage() !== "en-us") {
-			e.preventDefault();
-			welcomeModal.show();
-		}
+		e.preventDefault();
+		welcomeModal.show();
 	});
 });
