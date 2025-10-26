@@ -6,7 +6,7 @@ import { TheI18n } from "./i18n/i18n";
 import TurnStatus from './protocol/TurnStatus.js';
 import * as kblayout from './keyboard/layout.js';
 import { User, chatMessage } from './protocol/User.js';
-import VoteStatus from './protocol/VoteStatus.js';
+import VoteStatus from './protocol/states/VoteState.js';
 import * as Config from "../../config.json";
 
 let expectedClose: boolean = false;

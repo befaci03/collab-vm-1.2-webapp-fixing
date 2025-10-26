@@ -6,8 +6,8 @@ import { AdminOpcode, Permissions, Rank } from './Permissions.js';
 import TurnStatus from './TurnStatus.js';
 import Mouse from './mouse.js';
 import GetKeysym from '../keyboard/keysym.js';
-import VoteStatus from './VoteStatus.js';
-import MuteState from './MuteState.js';
+import VoteStatus from './states/VoteState.js';
+import MuteState from './states/MuteState.js';
 import { StringLike } from '../StringLike.js';
 import * as msgpack from 'msgpackr';
 // TODO: Properly workspaceify this

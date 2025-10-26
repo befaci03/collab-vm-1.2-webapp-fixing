@@ -5,7 +5,7 @@ import { Permissions, Rank } from './protocol/Permissions.js';
 import { User } from './protocol/User.js';
 import 'simple-keyboard/build/css/index.css';
 import * as bootstrap from 'bootstrap';
-import MuteState from './protocol/MuteState.js';
+import MuteState from './protocol/states/MuteState.js';
 import { I18nStringKey, TheI18n } from './i18n/i18n.js';
 import { Format } from './format.js';
 
