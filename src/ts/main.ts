@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	TheI18n.on('languageChanged', lang => {
 		// Update all dynamic text
 		if (VM) {
-			document.title = Format('{0} - {1}', VM.getNode()!, TheI18n.GetString(I18nStringKey.kGeneric_CollabVM));
+			document.title = Format('{0} - {1}', VM.getNode()!, typeof TheI18n.GetString(I18nStringKey.kGeneric_CollabVM) === "undefined" ? Config.SiteName : TheI18n.GetString(I18nStringKey.kGeneric_CollabVM));
 			if (turn !== -1) {
 				if (turn === 0) elements.turnstatus.innerText = TheI18n.GetString(I18nStringKey.kVM_TurnTimeTimer, turnTimer);
 				else elements.turnstatus.innerText = TheI18n.GetString(I18nStringKey.kVM_WaitingTurnTimer, turnTimer);
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 		}
 		else {
-			document.title = TheI18n.GetString(I18nStringKey.kGeneric_CollabVM);
+			document.title = typeof TheI18n.GetString(I18nStringKey.kGeneric_CollabVM) === "undefined" ? Config.SiteName : TheI18n.GetString(I18nStringKey.kGeneric_CollabVM);
 		}
 		if (!auth || !auth.account) elements.accountDropdownUsername.innerText = TheI18n.GetString(I18nStringKey.kNotLoggedIn);
 		if (darkTheme) elements.toggleThemeBtnText.innerHTML = TheI18n.GetString(I18nStringKey.kSiteButtons_LightMode);
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	if (hideFlag === null) hideFlag = false;
 	elements.hideFlagCheckbox.checked = hideFlag;
 
-	document.title = TheI18n.GetString(I18nStringKey.kGeneric_CollabVM);
+	document.title = typeof TheI18n.GetString(I18nStringKey.kGeneric_CollabVM) === "undefined" ? Config.SiteName : TheI18n.GetString(I18nStringKey.kGeneric_CollabVM);
 
 	// Load all VMs
 	loadList();

@@ -1,4 +1,5 @@
 import { keycodeKeysyms, keyidentifier_keysym, OSK_keyMappings } from "./keys.js";
+// TODO: make this shit more clear (maybe rewriting it?)
 
 export default function GetKeysym(keyCode: number, key: string, location: number): number | null {
 	let keysym = keysym_from_key_identifier(key, location) || keysym_from_keycode(keyCode, location);
@@ -44,21 +45,10 @@ function keysym_from_keycode(keyCode: number, location: number): number | null {
 	return get_keysym(keycodeKeysyms[keyCode], location);
 }
 
-function key_identifier_sane(keyCode: number, keyIdentifier: string): boolean {
-	if (!keyIdentifier) return false;
-	const unicodePrefixLocation = keyIdentifier.indexOf('U+');
-	if (unicodePrefixLocation === -1) return true;
-
-	const codepoint = parseInt(keyIdentifier.substring(unicodePrefixLocation + 2), 16);
-	if (keyCode !== codepoint) return true;
-	if ((keyCode >= 65 && keyCode <= 90) || (keyCode >= 48 && keyCode <= 57)) return true;
-	return false;
-}
-
 export function OSK_buttonToKeysym(button: string): number | null {
 	const keyMapping = OSK_keyMappings.find((mapping) => mapping.includes(button));
 	if (keyMapping) {
-		const [, keyCode, keyIdentifier, key, location] = keyMapping;
+		const [, keyCode, , key, location] = keyMapping;
 		return GetKeysym(keyCode, key, location);
 	}
 	return null;

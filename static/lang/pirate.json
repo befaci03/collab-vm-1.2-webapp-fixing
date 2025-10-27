@@ -5,7 +5,7 @@
 	"author": "Computernewb",
 
 	"stringKeys": {
-		"kSiteName": "Argh, matey, it's CollabVM!",
+		"kGeneric_CollabVM": "Argh, matey, it's CollabVM!",
 		"kHomeButton": "Arrrghh, set sail",
 		"kFAQButton": "Arrrgh, get your Map",
 		"kRulesButton": "Arrrrghh, get the Etiquette Book",

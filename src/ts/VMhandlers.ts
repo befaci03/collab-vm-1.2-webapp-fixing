@@ -114,7 +114,7 @@ export async function openVM(vm: iVM): Promise<void> {
 	}
 	// Set the title
     //@ts-ignore
-	document.title = Format('{0} - {1}', vm.id, TheI18n.GetString(I18nStringKey.kGeneric_CollabVM));
+	document.title = Format('{0} - {1}', vm.id, typeof TheI18n.GetString(I18nStringKey.kGeneric_CollabVM) === "undefined" ? Config.SiteName : TheI18n.GetString(I18nStringKey.kGeneric_CollabVM));
 	// Append canvas
 	elements.vmDisplay.appendChild(VM!.canvas);
 	// Switch to the VM view
@@ -129,7 +129,7 @@ export function closeVM() {
 	// Close the VM
 	VM.close();
 	VM = null;
-	document.title = TheI18n.GetString(I18nStringKey.kGeneric_CollabVM);
+	document.title = typeof TheI18n.GetString(I18nStringKey.kGeneric_CollabVM) === "undefined" ? Config.SiteName : TheI18n.GetString(I18nStringKey.kGeneric_CollabVM);
 	turn = -1;
 	// Remove the canvas
 	elements.vmDisplay.innerHTML = '';

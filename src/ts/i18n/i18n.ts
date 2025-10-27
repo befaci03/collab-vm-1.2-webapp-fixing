@@ -6,7 +6,7 @@ import Config from '../../../config.json';
 /// All string keys.
 export enum I18nStringKey {
 	// Generic things
-	kGeneric_CollabVM = 'kGeneric_CollabVM',
+	kGeneric_CollabVM = 'kGeneric_CollabVM', // this can be undefined
 	kGeneric_Yes = 'kGeneric_Yes',
 	kGeneric_No = 'kGeneric_No',
 	kGeneric_Ok = 'kGeneric_Ok',
@@ -440,7 +440,6 @@ export class I18n {
 
 	// Returns a (raw, unformatted) string. Currently only used if we don't need formatting.
 	GetStringRaw(key: I18nStringKey): string {
-		if (key === I18nStringKey.kGeneric_CollabVM && Config.SiteNameOverride) return Config.SiteNameOverride;
 		if (key === I18nStringKey.kWelcomeModal_Header && Config.WelcomeModalTitleOverride) return Config.WelcomeModalTitleOverride;
 		if (key === I18nStringKey.kWelcomeModal_Body && Config.WelcomeModalBodyOverride) return Config.WelcomeModalBodyOverride;
 		let val = this.lang.stringKeys[key];
@@ -451,7 +450,7 @@ export class I18n {
 		if (val == undefined) {
 			let fallback = fallbackLanguage.stringKeys[key];
 			if (fallback !== undefined) val = fallback;
-			else return `${key} (ERROR LOOKING UP TRANSLATION!!!)`;
+			else return `${key} (I18N LOOKUP ERR!!)`;
 		}
 
 		return val;
